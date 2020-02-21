@@ -57,162 +57,196 @@ function Chat() {
 
   const handleEnter = e => {
     if (e.key === "Enter") {
+      setShowEmojis(false)
       sendMessage(e);
     }
   };
 
- let  addEmoji = e => {
-    console.log(e.native);
-    setMessage(e.native);
-    let emoji = e.native;
-    setShowEmojis({
-      text: showEmojis + emoji
-    });
-  };
+  // function showEmoji(){
+  //   setShowEmojis({showEmojis:true})
+  //     document.addEventListener("click", closeMenu)
+  //   }
+  
 
 
-  let closeMenu = (e)  => {
-    console.log(setShowEmojis.emojiPicker);
-    if (setShowEmojis.emojiPicker !== null && !setShowEmojis.emojiPicker.contains(e.target)) {
-      setShowEmojis(
-        {
-          showEmojis: false
-        },
-        () => document.removeEventListener("click", closeMenu)
-      );
-    }
-  };
+  // setShowEmoji(e=> {
+  //   setShowEmojis(
+  //     {
+  //       showEmojis: true
+  //     },
+  //      document.addEventListener("click", closeMenu)
+  //   );
+  // });
+     
+  let  addEmoji = e => {
+     console.log(e.native);
+     setMessage(e.native);
+     let emoji = e.native;
+     setShowEmojis({
+       text: showEmojis + emoji
+     });
+   };
+ 
+ 
+   let closeMenu = e  => {
+     //console.log('come on here', e.emojiPicker);
+     if (setShowEmojis.emojiPicker !== null && !setShowEmojis.emojiPicker.contains(e.target)) {
+       setShowEmojis(
+         {
+           showEmojis: false
+         },
+         () => document.removeEventListener("click", closeMenu)
+       );
+     }
+   };
+ 
+ 
+  
+ 
+ 
+   const sendMessage = e => {
+     e.preventDefault();
+     if (message) {
+       socket.emit("message", { name, message });
+     }
+     setMessage('');
+   };
+ 
+   useEffect(() => {
+     setName(user.nickname);
+     setWelcome(`Hi ${name}! Welcome to the Chat!`)
+     
+   }, [name, user.nickname]);
+ 
+   useEffect(() => {
+     getLanguage();
+   }, [getLanguage, language])
+ 
+   useEffect(() => {
+       if (socketVal.name && socketVal.message) {
+           (async () => {
+         await translateMessage({message: socketVal.message, translation});
+           })();
+         
+         }
+   }, [socketVal, translateMessage, translation]);
+ 
+   return (
+     <div className="Chat">
+       <h1 className="chat-heading">{welcome}</h1>
+       <h3>
+         {isConnected
+           ? "You are connected to the chat"
+           : "You are not connected to the chat"}
+       </h3>
+       <div>
+         <select onChange={e => {
+             setLanguage(e.target.value);
+         }}>
+           <option>Select Language</option>
+           <option>English</option>
+           <option>Espanol</option>
+           <option>አማርኛ</option>
+           <option>русский</option>
+           <option>日本語</option>
+         </select>
+       </div>
+       <div className="chat-section">
+       <button className="chat-button" onClick={sendMessage}>
+           Send Message
+         </button>
+        
+         <input
+ 
+           type="text"
+           className="chat-input"
+           value={message}
+           onKeyUp={handleEnter}
+           onChange={e => {
+             setMessage(e.target.value);
+            
+           }}
+          
+         
+         />
 
-
+      
+ 
+ {showEmojis ? (<span style={styles.emojiPicker}  ref={el => setShowEmojis.emojiPicker = el}>
+ 
+ 
+       <Picker  
+              onSelect={addEmoji}
+              emojiTooltip={true}
+              title="weChat"
+            
+              />
+ 
+     </span>) : (
+       <p style={styles.getEmojiButton}  onClick={setShowEmojis}>
+           {String.fromCodePoint(0x1f60a)}
+           </p>
+         )}
+      
+         <p className="chat-output">{groupMessage}</p>
+       </div>
+       
+     </div>
+   );
+ }
+       
+ export default Chat;
  
 
+    //style={styles.emojiPicker} span
 
-  const sendMessage = e => {
-    e.preventDefault();
-    if (message) {
-      socket.emit("message", { name, message });
-    }
-    setMessage('');
-  };
-
-  useEffect(() => {
-    setName(user.nickname);
-    setWelcome(`Hi ${name}! Welcome to the Chat!`)
-    
-  }, [name, user.nickname]);
-
-  useEffect(() => {
-    getLanguage();
-  }, [getLanguage, language])
-
-  useEffect(() => {
-      if (socketVal.name && socketVal.message) {
-          (async () => {
-        await translateMessage({message: socketVal.message, translation});
-          })();
-        
-        }
-  }, [socketVal, translateMessage, translation]);
-
-  return (
-    <div className="Chat">
-      <h1 className="chat-heading">{welcome}</h1>
-      <h3>
-        {isConnected
-          ? "You are connected to the chat"
-          : "You are not connected to the chat"}
-      </h3>
-      <div>
-        <select onChange={e => {
-            setLanguage(e.target.value);
-        }}>
-          <option>Select Language</option>
-          <option>English</option>
-          <option>Espanol</option>
-          <option>አማርኛ</option>
-          <option>русский</option>
-          <option>日本語</option>
-        </select>
-      </div>
-      <div className="chat-section">
-      <button className="chat-button" onClick={sendMessage}>
-          Send Message
-        </button>
-       
-        <input
-
-          type="text"
-          className="chat-input"
-          value={message}
-          onKeyUp={handleEnter}
-          onChange={e => {
-            setMessage(e.target.value);
-          }}
-         
-        
-        />
-
-{showEmojis ? (<span style={styles.emojiPicker} ref={el => setShowEmojis.emojiPicker = el}>
+         //p style={styles.getEmojiButton}
+ const styles ={
+ 
+  emojiPicker: {
+     position: "absolute",
+     bottom: 10,
+     right: 0,
+     cssFloat: "right",
+     marginLeft: "200px"
+  },
+  getEmojiButton: {
+   cssFloat: "right",
+   border: "none",
+   margin: 0,
+   cursor: "pointer"
+ },
+ }
+  
 
 
-      <Picker  
-             onSelect={addEmoji}
-             emojiTooltip={true}
-             title="weChat"
-           
-             />
 
-    </span>) : (
-      <p  style={styles.getEmojiButton} onClick={setShowEmojis}>
-          {String.fromCodePoint(0x1f60a)}
-          </p>
-        )}
-     
-        <p className="chat-output">{groupMessage}</p>
-      </div>
-      
-    </div>
-  );
-}
-      
+
+  
+  
+   
+
+
+
+  
+ 
+ 
+
+  
+
 
 
 
       
 
 
-
-export default Chat;
 
           
      
-const styles ={
-
- emojiPicker: {
-    position: "absolute",
-    bottom: 10,
-    right: 0,
-    cssFloat: "right",
-    marginLeft: "200px"
- },
- getEmojiButton: {
-  cssFloat: "right",
-  border: "none",
-  margin: 0,
-  cursor: "pointer"
-},
-}
 
 
 
-// chart: function addEmoji(emoji){
-//   const{newMessage}=this.state;
-//   const text = `${newMessage}${emoji.native}`;
-//   this.setState({
-//     newMessage:text,
-//     showEmojiPicker:false,
-//   });
-// }
+
 
 
 
