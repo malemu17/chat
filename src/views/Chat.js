@@ -61,7 +61,7 @@ function Chat() {
       sendMessage(e);
     }
   };
-
+//helper 
   // function showEmoji(){
   //   setShowEmojis({showEmojis:true})
   //     document.addEventListener("click", closeMenu)
